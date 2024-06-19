@@ -38,7 +38,7 @@ func startRepl() {
 
 		err := command.callback()
 		if err != nil {
-			fmt.Printf("There was a problem executing the command: %s\n", err)
+			fmt.Printf("There was a problem executing the command: %s", err)
 		}
 	}
 }
@@ -59,6 +59,11 @@ func getCommands() map[string]cliCommand {
 			name:        "help",
 			description: "Shows all available commands and what they do",
 			callback:    callbackHelp,
+		},
+		"map": {
+			name:        "map",
+			description: "Shows 20 locations in the Pokemon world",
+			callback:    callbackMap,
 		},
 	}
 }
