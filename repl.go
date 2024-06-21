@@ -10,10 +10,10 @@ import (
 type cliCommand struct {
 	name        string
 	description string
-	callback    func() error
+	callback    func(*config) error
 }
 
-func startRepl() {
+func startRepl(cfg *config) {
 
 	scanner := bufio.NewScanner(os.Stdin)
 	availableCommands := getCommands()
@@ -25,7 +25,7 @@ func startRepl() {
 		scanner.Scan()
 		input := cleanInput(scanner.Text())
 
-		// enables empty returns
+		// enables empty returns -> press enter, get a new input line
 		if len(input) == 0 {
 			continue
 		}
@@ -36,7 +36,7 @@ func startRepl() {
 			continue
 		}
 
-		err := command.callback()
+		err := command.callback(cfg)
 		if err != nil {
 			fmt.Printf("There was a problem executing the command: %s", err)
 		}
@@ -64,6 +64,11 @@ func getCommands() map[string]cliCommand {
 			name:        "map",
 			description: "Shows 20 locations in the Pokemon world",
 			callback:    callbackMap,
+		},
+		"mapb": {
+			name:        "mapb",
+			description: "Shows the previous 20 locations",
+			callback:    callbackMapb,
 		},
 	}
 }

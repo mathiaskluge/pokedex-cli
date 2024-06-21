@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+
+	"github.com/mathiaskluge/pokedex-cli/internal/pokecache"
 )
 
 type locationAreasResp struct {
@@ -17,12 +19,21 @@ type locationAreasResp struct {
 	} `json:"results"`
 }
 
-func (c *Client) ListLocationAreas(paginationURL *string) (locationAreasResp, error) {
+func (c *Client) ListLocationAreas(paginationURL *string, cache *pokecache.Cache) (locationAreasResp, error) {
 	endpoint := "/location-area"
 	fullURL := baseURL + endpoint
 
 	if paginationURL != nil {
 		fullURL = *paginationURL
+	}
+
+	if body, ok := cache.Get(fullURL); ok {
+		locationAreas := locationAreasResp{}
+		err := json.Unmarshal(body, &locationAreas)
+		if err != nil {
+			return locationAreasResp{}, err
+		}
+		return locationAreas, nil
 	}
 
 	req, err := http.NewRequest("GET", fullURL, nil)
@@ -44,12 +55,14 @@ func (c *Client) ListLocationAreas(paginationURL *string) (locationAreasResp, er
 	if err != nil {
 		return locationAreasResp{}, err
 	}
+	cache.Add(fullURL, body)
 
 	locationAreas := locationAreasResp{}
 	err = json.Unmarshal(body, &locationAreas)
 	if err != nil {
 		return locationAreasResp{}, err
 	}
-
+	cache.Add(fullURL, body)
 	return locationAreas, nil
+
 }
